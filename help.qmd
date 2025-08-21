@@ -6,4 +6,4 @@ format: html
 
 Want to help update our list and add citations? We welcome your contributions. 
 
-The easiest way to do so is to download the TandemFluorophores.csv file located [here](), update it, and then send it back to us (either by email, via Discord, or opening an issue here on GitHub). 
+The easiest way to do so is to download the TandemFluorophores.csv file located [here](data/TandemFluorophores.csv), update it, and then send it back to us (either by email, via Discord, or opening an issue here on GitHub).
