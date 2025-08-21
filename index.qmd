@@ -1,0 +1,125 @@
+---
+title: ""
+format: html
+---
+
+![](images/TandemMeme.png){fig-align="center"}
+
+```{r}
+#| include: false
+#| message: false
+#| warning: false
+
+library(Luciernaga)
+library(dplyr)
+library(stringr)
+```
+
+```{r}
+#| include: false
+Here <- Luciernaga:::InstrumentReferences("64") |> select(-Instrument)
+
+FluorophoreByDetector <- Here |> group_by(Fluorophore) |> 
+    arrange(desc(AdjustedY)) |> slice(1)
+
+FluorophoreByDetector <- FluorophoreByDetector |>
+    mutate(Laser = case_when(
+    str_detect(Detector, "UV") ~ "UV",
+    str_detect(Detector, "^V") ~ "V",
+    str_detect(Detector, "B") ~ "B",
+    str_detect(Detector, "YG") ~ "YG",
+    str_detect(Detector, "R") ~ "R",
+    TRUE ~ NA_character_
+  ))
+
+FluorophoreByDetector <- FluorophoreByDetector |>
+    mutate(DetectorNumber = str_extract(Detector, "\\d+") |> as.numeric())
+    
+FluorophoreByDetector$Laser <- factor(FluorophoreByDetector$Laser, levels=c("UV", "V", "B", "YG", "R"))
+
+FluorophoreByDetector <- FluorophoreByDetector |> group_by(Laser) |> arrange(Laser, DetectorNumber) |> ungroup()
+
+ShortList <- FluorophoreByDetector |> select(Fluorophore, Detector)
+```
+
+```{r}
+#| include: false
+
+InCosineOrder <- function(x, data, signatures){
+    Fluors <- data |> dplyr::filter(Detector %in% x) |>
+        dplyr::pull(Fluorophore)
+
+    if (length(Fluors) > 1){
+        TheSignatures <- signatures |>
+             dplyr::filter(Fluorophore %in% Fluors)
+        TheData <- TheSignatures |>
+            tidyr::pivot_wider(names_from="Detector",values_from="AdjustedY")
+        Reordered <- Luciernaga_Cosine(data=TheData, returntype="data")
+        TheList <- rownames(Reordered)
+    } else {TheList <- Fluors}
+
+    return(TheList)
+}
+```
+
+```{r}
+#| include: FALSE
+
+DetectorList <- ShortList |> pull(Detector) |> unique()
+
+FluorsInOrder <- purrr::map(.x=DetectorList, data=ShortList,
+ .f=InCosineOrder, signatures=Here) |> purrr::flatten() |> unlist()
+
+# Assuming FluorsInOrder is a vector with the desired order
+# Example: FluorsInOrder <- c("Red", "YG", "Cy5", "Cy7")
+
+ShortList <- ShortList |>
+  mutate(Fluorophore = factor(Fluorophore, levels = FluorsInOrder)) |>
+  arrange(Fluorophore) |>
+  mutate(Fluorophore = as.character(Fluorophore))
+
+ShortList <- ShortList |> mutate(Tandem="", Citation="")
+#write.csv(ShortList, "data/TandemFluorophores.csv", row.names=FALSE)
+```
+
+```{r}
+#| include: FALSE
+Updated <- read.csv("data/TandemFluorophores.csv", check.names=FALSE)
+```
+
+```{r}
+#| include: false
+#| message: false
+#| warning: false
+library(DT)
+```
+
+```{r}
+#| echo: false
+library(DT)
+
+datatable(
+  Updated,
+  extensions = c('Buttons', 'Select', 'Scroller'),
+  options = list(
+    searching = TRUE,
+    ordering = TRUE,
+    scrollX = TRUE,
+    scrollY = 400,
+    
+    dom = 'Bfrtip',
+    buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+    
+    select = list(style = 'os', items = 'row'),
+    
+    deferRender = TRUE,
+    scroller = TRUE,
+    searchHighlight = TRUE
+  ),
+  selection = 'multiple',
+  filter = 'top',
+  class = 'display nowrap compact',
+  rownames = FALSE
+)
+
+```
