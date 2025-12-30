@@ -1,0 +1,44 @@
+---
+title: "All Named Fluors"
+format: html
+---
+
+```{r}
+#| include: false
+#| message: false
+#| warning: false
+
+library(Luciernaga)
+library(dplyr)
+```
+
+
+```{r}
+# ?QC_ReferenceLibrary
+
+ReferenceInstrument <- 64
+
+InstrumentList <- c(54, 48, 38, 30, 22, 14,
+78, "48_S", "48_A", 184, "182_DUV", 147, 112, 86, 
+55, "52_7L", "52_6L", 51)
+
+# x <- InstrumentList[7]
+x <- InstrumentList[10]
+
+DetectorConversion <- function(x, ReferenceInstrument){
+    Reference <- Luciernaga:::InstrumentReferences(ReferenceInstrument) |> select(-Instrument)
+    ReferenceFluors <- Reference |> pull(Fluorophore) |> unique()
+    Instrument <- Luciernaga:::InstrumentReferences(x) |> select(-Instrument)
+    InstrumentFluors <- Instrument |> pull(Fluorophore) |> unique()
+    DifferentFluors <- setdiff(InstrumentFluors, ReferenceFluors)
+    DifferentFluors
+    
+    if (length(DifferentFluors) == 0){
+    TheExit <- NULL    
+    return(TheExit)
+    }
+
+
+}
+```
+
