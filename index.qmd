@@ -98,6 +98,12 @@ library(DT)
 #| echo: false
 library(DT)
 
+Updated$Citation <- ifelse(
+  !is.na(Updated$Citation) & Updated$Citation != "",
+  paste0('<a href="', Updated$Citation, '" target="_blank">Citation</a>'),
+  ""
+)
+
 datatable(
   Updated,
   extensions = c('Buttons', 'Select', 'Scroller'),
@@ -116,6 +122,7 @@ datatable(
     scroller = TRUE,
     searchHighlight = TRUE
   ),
+  escape = FALSE,
   selection = 'multiple',
   filter = 'top',
   class = 'display nowrap compact',

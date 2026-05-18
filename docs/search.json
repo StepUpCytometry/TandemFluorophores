@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "AllFluors.html",
+    "href": "AllFluors.html",
+    "title": "All Named Fluors",
+    "section": "",
+    "text": "# ?QC_ReferenceLibrary\n\nReferenceInstrument &lt;- 64\n\nInstrumentList &lt;- c(54, 48, 38, 30, 22, 14,\n78, \"48_S\", \"48_A\", 184, \"182_DUV\", 147, 112, 86, \n55, \"52_7L\", \"52_6L\", 51)\n\n# x &lt;- InstrumentList[7]\nx &lt;- InstrumentList[10]\n\nDetectorConversion &lt;- function(x, ReferenceInstrument){\n    Reference &lt;- Luciernaga:::InstrumentReferences(ReferenceInstrument) |&gt; select(-Instrument)\n    ReferenceFluors &lt;- Reference |&gt; pull(Fluorophore) |&gt; unique()\n    Instrument &lt;- Luciernaga:::InstrumentReferences(x) |&gt; select(-Instrument)\n    InstrumentFluors &lt;- Instrument |&gt; pull(Fluorophore) |&gt; unique()\n    DifferentFluors &lt;- setdiff(InstrumentFluors, ReferenceFluors)\n    DifferentFluors\n    \n    if (length(DifferentFluors) == 0){\n    TheExit &lt;- NULL    \n    return(TheExit)\n    }\n\n\n}"
+  },
+  {
     "objectID": "help.html",
     "href": "help.html",
     "title": "Help us update the list!",
